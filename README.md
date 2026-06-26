@@ -1,3 +1,5 @@
+# 前排提醒，此项目纯属个人Vibecoding玩的答辩项目，使用前请务必慎重！
+
 # Fastboot.js Next
 
 English | [简体中文](#简体中文)
