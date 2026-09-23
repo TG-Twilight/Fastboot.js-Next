@@ -1,28 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { connect, disconnect, isBusy, isConnected, reboot, session, setActiveSlot } from "@/app/session";
+import { lockFact, modeFact, slotFact } from "@/app/deviceFacts";
+import { connect, disconnect, isBusy, isConnected, profile, reboot, session, setActiveSlot } from "@/app/session";
 import type { RebootTarget } from "@/fastboot/device";
-import { t, type MessageKey } from "@/i18n";
+import { t } from "@/i18n";
 import AppIcon from "./AppIcon.vue";
 
 defineProps<{ supported: boolean }>();
 
 const targets: RebootTarget[] = ["system", "bootloader", "fastboot", "recovery"];
 
-const rows = computed(() => {
-  const s = session.summary;
-  if (!s) return [];
-  const flag = (value: boolean | null) => (value === null ? "—" : t(value ? "yes" : "no"));
-  const list: [MessageKey, string][] = [
-    ["device.product", s.product || "—"],
-    ["device.serial", s.serial || "—"],
-    ["device.mode", t(s.mode === "fastbootd" ? "device.mode.fastbootd" : "device.mode.bootloader")],
-    ["device.unlocked", flag(s.unlocked)]
-  ];
-  if (s.slot) list.push(["device.slot", s.slot.toUpperCase()]);
-  if (s.bootloaderVersion) list.push(["device.bootloaderVersion", s.bootloaderVersion]);
-  if (s.basebandVersion) list.push(["device.basebandVersion", s.basebandVersion]);
-  return list;
+const chips = computed(() => {
+  const p = profile.value;
+  return p ? [modeFact(p), lockFact(p), slotFact(p)] : [];
 });
 </script>
 
@@ -36,11 +26,15 @@ const rows = computed(() => {
 
     <p v-if="!isConnected && session.state !== 'reconnecting'" class="hint">{{ t("device.hint") }}</p>
 
-    <dl v-if="rows.length" class="summary">
-      <template v-for="[label, value] in rows" :key="label">
-        <dt>{{ t(label) }}</dt>
-        <dd class="mono">{{ value }}</dd>
-      </template>
+    <div v-if="profile" class="identity">
+      <strong class="codename mono">{{ profile.codename ?? t("info.unknown") }}</strong>
+      <span v-if="session.manufacturer" class="hint">{{ session.manufacturer }}</span>
+    </div>
+    <dl v-if="chips.length" class="chips">
+      <div v-for="chip in chips" :key="chip.label" class="chip" :data-tone="chip.tone">
+        <dt>{{ t(chip.label) }}</dt>
+        <dd>{{ chip.value }}</dd>
+      </div>
     </dl>
 
     <div class="row">
@@ -62,14 +56,14 @@ const rows = computed(() => {
         </div>
       </div>
 
-      <div v-if="session.summary?.slot" class="stack section">
+      <div v-if="profile?.slot" class="stack section">
         <h3>{{ t("device.setActive") }}</h3>
         <div class="segmented">
           <button
             v-for="slot in ['a', 'b'] as const"
             :key="slot"
-            :aria-pressed="session.summary.slot === slot"
-            :disabled="isBusy || session.summary.slot === slot"
+            :aria-pressed="profile.slot === slot"
+            :disabled="isBusy || profile.slot === slot"
             @click="setActiveSlot(slot)"
           >
             {{ slot.toUpperCase() }}
@@ -108,20 +102,56 @@ const rows = computed(() => {
   color: var(--on-warn-container);
 }
 
-.summary {
+.identity {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 16px;
+}
+
+.codename {
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.chips {
+  display: grid;
+  gap: 6px;
   margin: 0;
 }
 
-.summary dt {
+.chip {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-m);
+  background: var(--surface-mid);
+}
+
+.chip dt {
   color: var(--on-surface-variant);
 }
 
-.summary dd {
+.chip dd {
   margin: 0;
-  overflow-wrap: anywhere;
+  font-weight: 500;
+  text-align: right;
+}
+
+.chip[data-tone="good"] {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.chip[data-tone="warn"] {
+  background: var(--warn-container);
+  color: var(--on-warn-container);
+}
+
+.chip[data-tone="good"] dt,
+.chip[data-tone="warn"] dt {
+  color: inherit;
+  opacity: 0.8;
 }
 
 .section {

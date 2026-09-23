@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { bootImage, erasePartition, flashPartition, isBusy, isConnected, partitions, session } from "@/app/session";
+import { bootImage, erasePartition, flashPartition, isBusy, isConnected, partitions, profile } from "@/app/session";
 import type { SlotSelector } from "@/fastboot/device";
 import { t } from "@/i18n";
 import AppIcon from "./AppIcon.vue";
@@ -28,7 +28,7 @@ const erasePartitionName = ref("");
           <span>{{ t("flash.partition") }}</span>
           <input v-model="partition" class="input mono" list="partitions" placeholder="boot" spellcheck="false" />
         </label>
-        <div v-if="session.summary?.slot" class="field">
+        <div v-if="profile?.layout.ab" class="field">
           <span>{{ t("flash.slot") }}</span>
           <div class="segmented">
             <button v-for="s in slots" :key="s" :aria-pressed="slot === s" @click="slot = s">
@@ -37,7 +37,7 @@ const erasePartitionName = ref("");
           </div>
         </div>
       </div>
-      <p v-if="session.summary?.slot" class="hint">{{ t("flash.partitionHint") }}</p>
+      <p v-if="profile?.layout.ab" class="hint">{{ t("flash.partitionHint") }}</p>
       <FilePicker v-model="flashFile" accept=".img,.bin,.mbn,.elf" />
       <div class="row">
         <button

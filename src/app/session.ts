@@ -6,21 +6,11 @@ import { isWebUsbSupported } from "@/fastboot/transport";
 import { openFastboot, requestUsbDevice, waitForUsbDevice } from "@/fastboot/usb";
 import { t } from "@/i18n";
 import { confirmAction } from "./confirm";
+import { profileFromVariables } from "./deviceProfile";
 import { isDangerousCommand, normalizeCommand } from "./format";
 import { log } from "./log";
 
 export type ConnectionState = "disconnected" | "connecting" | "connected" | "reconnecting";
-
-export interface DeviceSummary {
-  product: string;
-  serial: string;
-  mode: "bootloader" | "fastbootd";
-  slot: string | null;
-  slotCount: number;
-  unlocked: boolean | null;
-  bootloaderVersion: string | null;
-  basebandVersion: string | null;
-}
 
 export interface TaskState {
   title: string;
@@ -34,8 +24,9 @@ export interface TaskState {
 
 export const session = reactive({
   state: "disconnected" as ConnectionState,
-  summary: null as DeviceSummary | null,
   variables: [] as [string, string][],
+  /** From the USB descriptor; fastboot has no variable for it. */
+  manufacturer: null as string | null,
   task: null as TaskState | null,
   /** Set while a reboot needs the user to pick the device again. */
   reconnectTarget: null as RebootTarget | null
@@ -43,6 +34,9 @@ export const session = reactive({
 
 export const isBusy = computed(() => session.task !== null || session.state === "connecting");
 export const isConnected = computed(() => session.state === "connected");
+
+/** Human-oriented view of the connected device. */
+export const profile = computed(() => (session.variables.length ? profileFromVariables(new Map(session.variables)) : null));
 
 /** Partition names reported by the device, without slot suffixes. */
 export const partitions = computed(() => {
@@ -82,8 +76,8 @@ function resetSession(): void {
   device = null;
   usb = null;
   session.state = "disconnected";
-  session.summary = null;
   session.variables = [];
+  session.manufacturer = null;
 }
 
 function isUserCancel(error: unknown): boolean {
@@ -148,6 +142,7 @@ async function attach(selected: USBDevice): Promise<void> {
     }
   }
   usb = selected;
+  session.manufacturer = selected.manufacturerName?.trim() || null;
   device.onMessage = (message) => log("device", message);
   session.state = "connected";
   log("info", `${selected.manufacturerName ?? ""} ${selected.productName ?? ""} (${selected.serialNumber ?? "?"})`.trim());
@@ -165,18 +160,6 @@ async function readVariables(): Promise<void> {
     }
   }
   session.variables = [...variables].sort(([a], [b]) => a.localeCompare(b));
-
-  const flag = (value: string | undefined) => (value === "yes" ? true : value === "no" ? false : null);
-  session.summary = {
-    product: variables.get("product") ?? usb?.productName ?? "",
-    serial: variables.get("serialno") ?? usb?.serialNumber ?? "",
-    mode: variables.get("is-userspace") === "yes" ? "fastbootd" : "bootloader",
-    slot: variables.get("current-slot")?.replace(/^_/, "") ?? null,
-    slotCount: Number(variables.get("slot-count") ?? 0),
-    unlocked: flag(variables.get("unlocked")),
-    bootloaderVersion: variables.get("version-bootloader") ?? null,
-    basebandVersion: variables.get("version-baseband") ?? null
-  };
 }
 
 export async function connect(): Promise<void> {

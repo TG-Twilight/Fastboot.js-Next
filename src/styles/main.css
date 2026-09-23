@@ -269,6 +269,12 @@ h3 {
   cursor: not-allowed;
 }
 
+/* The current choice is often disabled (e.g. the active slot) but should still read as selected. */
+.segmented button[aria-pressed="true"]:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
 .banner {
   display: flex;
   gap: 12px;
