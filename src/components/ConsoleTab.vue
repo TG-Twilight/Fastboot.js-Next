@@ -37,35 +37,33 @@ function browse(step: number) {
 </script>
 
 <template>
-  <div class="stack">
-    <form class="row" @submit.prevent="submit">
-      <input
-        v-model="input"
-        class="input mono command"
-        :placeholder="t('console.placeholder')"
-        :aria-label="t('tabs.console')"
-        :disabled="!isConnected"
-        spellcheck="false"
-        autocomplete="off"
-        @keydown.up.prevent="browse(1)"
-        @keydown.down.prevent="browse(-1)"
-      />
-      <button class="btn" type="submit" :disabled="!isConnected || isBusy || !input.trim()">
-        <AppIcon name="terminal" />{{ t("console.run") }}
-      </button>
-    </form>
-    <p class="hint">{{ t("console.hint") }}</p>
-    <div class="row">
-      <button
-        v-for="command in QUICK_COMMANDS"
-        :key="command"
-        class="btn outlined small mono"
-        :disabled="!isConnected || isBusy"
-        @click="runCommand(command)"
-      >
-        {{ command }}
-      </button>
-    </div>
+  <form class="row" @submit.prevent="submit">
+    <input
+      v-model="input"
+      class="input mono command"
+      :placeholder="t('console.placeholder')"
+      :aria-label="t('tabs.console')"
+      :disabled="!isConnected"
+      spellcheck="false"
+      autocomplete="off"
+      @keydown.up.prevent="browse(1)"
+      @keydown.down.prevent="browse(-1)"
+    />
+    <button class="btn" type="submit" :disabled="!isConnected || isBusy || !input.trim()">
+      <AppIcon name="terminal" />{{ t("console.run") }}
+    </button>
+  </form>
+  <p class="hint">{{ t("console.hint") }}</p>
+  <div class="row">
+    <button
+      v-for="command in QUICK_COMMANDS"
+      :key="command"
+      class="btn outlined small mono"
+      :disabled="!isConnected || isBusy"
+      @click="runCommand(command)"
+    >
+      {{ command }}
+    </button>
   </div>
 </template>
 

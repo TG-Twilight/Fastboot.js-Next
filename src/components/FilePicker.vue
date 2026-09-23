@@ -46,10 +46,10 @@ function onDrop(event: DragEvent) {
 .picker {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px dashed var(--outline);
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-control);
   color: var(--on-surface-variant);
   cursor: pointer;
   transition: background-color 0.15s, border-color 0.15s;

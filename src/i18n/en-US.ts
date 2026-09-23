@@ -31,6 +31,8 @@ export default {
 
   "info.filter": "Filter",
   "info.refresh": "Refresh",
+  "info.copySummary": "Copy info",
+  "info.copied": "Copied",
   "info.copy": "Copy all",
   "info.empty": "Connect a device to see its variables.",
   "info.name": "Name",

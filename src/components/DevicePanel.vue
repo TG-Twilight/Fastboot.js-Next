@@ -4,6 +4,7 @@ import { lockFact, modeFact, slotFact } from "@/app/deviceFacts";
 import { connect, disconnect, isBusy, isConnected, profile, reboot, session, setActiveSlot } from "@/app/session";
 import type { RebootTarget } from "@/fastboot/device";
 import { t } from "@/i18n";
+import AppCard from "./AppCard.vue";
 import AppIcon from "./AppIcon.vue";
 
 defineProps<{ supported: boolean }>();
@@ -17,47 +18,43 @@ const chips = computed(() => {
 </script>
 
 <template>
-  <section class="card stack device">
-    <header class="row head">
-      <AppIcon name="usb" :size="24" />
-      <h2>{{ t("device.title") }}</h2>
+  <AppCard :title="t('device.title')" icon="usb">
+    <template #actions>
       <span class="status" :data-state="session.state">{{ t(`device.state.${session.state}`) }}</span>
-    </header>
+    </template>
 
-    <p v-if="!isConnected && session.state !== 'reconnecting'" class="hint">{{ t("device.hint") }}</p>
-
-    <div v-if="profile" class="identity">
-      <strong class="codename mono">{{ profile.codename ?? t("info.unknown") }}</strong>
-      <span v-if="session.manufacturer" class="hint">{{ session.manufacturer }}</span>
-    </div>
-    <dl v-if="chips.length" class="chips">
-      <div v-for="chip in chips" :key="chip.label" class="chip" :data-tone="chip.tone">
-        <dt>{{ t(chip.label) }}</dt>
-        <dd>{{ chip.value }}</dd>
-      </div>
-    </dl>
-
-    <div class="row">
-      <button v-if="!isConnected" class="btn" :disabled="!supported || isBusy" @click="connect">
+    <template v-if="!isConnected">
+      <p v-if="session.state !== 'reconnecting'" class="hint">{{ t("device.hint") }}</p>
+      <button class="btn block" :disabled="!supported || isBusy" @click="connect">
         <AppIcon name="usb" />{{ t("device.connect") }}
       </button>
-      <button v-else class="btn outlined" :disabled="isBusy" @click="disconnect">
-        {{ t("device.disconnect") }}
-      </button>
-    </div>
+    </template>
 
-    <template v-if="isConnected">
-      <div class="stack section">
-        <h3 class="row"><AppIcon name="power" :size="18" />{{ t("device.reboot") }}</h3>
-        <div class="row">
+    <template v-else>
+      <div class="section">
+        <div class="identity">
+          <strong class="codename mono">{{ profile?.codename ?? t("info.unknown") }}</strong>
+          <span v-if="session.manufacturer" class="hint">{{ session.manufacturer }}</span>
+        </div>
+        <dl class="chips">
+          <div v-for="chip in chips" :key="chip.label" class="chip" :data-tone="chip.tone">
+            <dt>{{ t(chip.label) }}</dt>
+            <dd>{{ chip.value }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="section">
+        <h3 class="section-title"><AppIcon name="power" :size="18" />{{ t("device.reboot") }}</h3>
+        <div class="grid-2">
           <button v-for="target in targets" :key="target" class="btn tonal small" :disabled="isBusy" @click="reboot(target)">
             {{ t(`device.reboot.${target}`) }}
           </button>
         </div>
       </div>
 
-      <div v-if="profile?.slot" class="stack section">
-        <h3>{{ t("device.setActive") }}</h3>
+      <div v-if="profile?.slot" class="section">
+        <h3 class="section-title">{{ t("device.setActive") }}</h3>
         <div class="segmented">
           <button
             v-for="slot in ['a', 'b'] as const"
@@ -66,29 +63,26 @@ const chips = computed(() => {
             :disabled="isBusy || profile.slot === slot"
             @click="setActiveSlot(slot)"
           >
-            {{ slot.toUpperCase() }}
+            {{ t("info.slotValue", { slot: slot.toUpperCase() }) }}
           </button>
         </div>
       </div>
+
+      <div class="section">
+        <button class="btn outlined block" :disabled="isBusy" @click="disconnect">{{ t("device.disconnect") }}</button>
+      </div>
     </template>
-  </section>
+  </AppCard>
 </template>
 
 <style scoped>
-.head {
-  gap: 10px;
-}
-
-.head h2 {
-  flex: 1;
-}
-
 .status {
   padding: 2px 10px;
   border-radius: 999px;
   background: var(--surface-high);
   color: var(--on-surface-variant);
   font-size: 0.85em;
+  white-space: nowrap;
 }
 
 .status[data-state="connected"] {
@@ -102,12 +96,17 @@ const chips = computed(() => {
   color: var(--on-warn-container);
 }
 
+.block {
+  width: 100%;
+}
+
 .identity {
   display: grid;
+  gap: 2px;
 }
 
 .codename {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 600;
   line-height: 1.2;
   overflow-wrap: anywhere;
@@ -115,16 +114,18 @@ const chips = computed(() => {
 
 .chips {
   display: grid;
-  gap: 6px;
+  gap: var(--space-2);
   margin: 0;
 }
 
 .chip {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--radius-m);
+  gap: var(--space-3);
+  min-height: var(--control-height);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-control);
   background: var(--surface-mid);
 }
 
@@ -148,20 +149,14 @@ const chips = computed(() => {
   color: var(--on-warn-container);
 }
 
-.chip[data-tone="good"] dt,
-.chip[data-tone="warn"] dt {
+.chip[data-tone] dt {
   color: inherit;
   opacity: 0.8;
 }
 
-.section {
-  padding-top: 12px;
-  border-top: 1px solid var(--outline-variant);
-}
-
-.section h3 {
-  gap: 6px;
-  color: var(--on-surface-variant);
-  font-size: 0.9rem;
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
 }
 </style>

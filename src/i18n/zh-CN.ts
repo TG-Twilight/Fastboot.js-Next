@@ -33,6 +33,8 @@ export default {
 
   "info.filter": "筛选",
   "info.refresh": "刷新",
+  "info.copySummary": "复制信息",
+  "info.copied": "已复制",
   "info.copy": "全部复制",
   "info.empty": "连接设备后显示设备变量。",
   "info.name": "名称",

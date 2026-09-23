@@ -29,15 +29,15 @@ const percent = computed(() => {
 <style scoped>
 .task {
   display: grid;
-  gap: 8px;
-  padding: 16px 20px;
-  border-radius: var(--radius-l);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
   background: var(--primary-container);
   color: var(--on-primary-container);
 }
 
 .head {
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .title {

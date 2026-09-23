@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue";
+import { useCopy } from "@/app/clipboard";
 import { clearLogs, formatLogs, logs } from "@/app/log";
 import { t } from "@/i18n";
+import AppCard from "./AppCard.vue";
 import AppIcon from "./AppIcon.vue";
 
 const list = ref<HTMLElement | null>(null);
+const { copied, copy } = useCopy();
 
 // Follow new entries unless the user scrolled up to read.
 watch(
@@ -18,24 +21,20 @@ watch(
   }
 );
 
-function copy() {
-  void navigator.clipboard.writeText(formatLogs());
-}
-
 const time = (date: Date) => date.toLocaleTimeString(undefined, { hour12: false });
 </script>
 
 <template>
-  <section class="card log">
-    <header class="row head">
-      <h2>{{ t("log.title") }}</h2>
-      <button class="icon-btn" :title="t('log.copy')" :aria-label="t('log.copy')" :disabled="!logs.length" @click="copy">
-        <AppIcon name="copy" />
+  <AppCard :title="t('log.title')" icon="terminal">
+    <template #actions>
+      <button class="icon-btn" :title="t('log.copy')" :aria-label="t('log.copy')" :disabled="!logs.length" @click="copy(formatLogs())">
+        <AppIcon :name="copied ? 'check' : 'copy'" />
       </button>
       <button class="icon-btn" :title="t('log.clear')" :aria-label="t('log.clear')" :disabled="!logs.length" @click="clearLogs">
         <AppIcon name="delete" />
       </button>
-    </header>
+    </template>
+
     <div ref="list" class="entries mono">
       <p v-if="!logs.length" class="hint">{{ t("log.empty") }}</p>
       <div v-for="entry in logs" :key="entry.id" class="entry" :data-level="entry.level">
@@ -43,33 +42,23 @@ const time = (date: Date) => date.toLocaleTimeString(undefined, { hour12: false 
         <span class="text">{{ entry.text }}</span>
       </div>
     </div>
-  </section>
+  </AppCard>
 </template>
 
 <style scoped>
-.log {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 8px;
-  min-height: 0;
-}
-
-.head h2 {
-  flex: 1;
-}
-
 .entries {
-  height: 260px;
+  height: 240px;
   overflow: auto;
-  padding: 8px 12px;
-  border-radius: var(--radius-m);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-control);
   background: var(--surface);
   font-size: 12.5px;
 }
 
 .entry {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 1px 0;
 }
 
@@ -93,8 +82,7 @@ const time = (date: Date) => date.toLocaleTimeString(undefined, { hour12: false 
 }
 
 [data-level="warn"] .text {
-  color: var(--on-warn-container);
-  background: var(--warn-container);
+  color: var(--warn);
 }
 
 [data-level="error"] .text {

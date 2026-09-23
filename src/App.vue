@@ -3,6 +3,7 @@ import { shallowRef, watch, type Component } from "vue";
 import "@/app/theme";
 import { isWebUsbSupported } from "@/fastboot/transport";
 import { t, type MessageKey } from "@/i18n";
+import AppCard from "./components/AppCard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppIcon, { type IconName } from "./components/AppIcon.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
@@ -30,119 +31,121 @@ watch(active, (tab) => history.replaceState(null, "", `#${tab.id}`));
 </script>
 
 <template>
-  <div class="app">
-    <AppHeader />
+  <AppHeader />
 
+  <div class="page">
     <div v-if="!secure" class="banner error" role="alert">
-      <AppIcon name="warning" />{{ t("support.insecure") }}
+      <AppIcon name="warning" /><span>{{ t("support.insecure") }}</span>
     </div>
     <div v-else-if="!supported" class="banner error" role="alert">
-      <AppIcon name="warning" />{{ t("support.noWebUsb") }}
+      <AppIcon name="warning" /><span>{{ t("support.noWebUsb") }}</span>
     </div>
 
     <main class="layout">
-      <DevicePanel :supported="supported && secure" />
+      <aside class="sidebar">
+        <DevicePanel :supported="supported && secure" />
+      </aside>
 
-      <div class="stack main">
+      <div class="content">
         <TaskPanel />
-        <section class="card workspace">
-          <div class="tabs" role="tablist">
-            <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              role="tab"
-              class="tab"
-              :aria-selected="active.id === tab.id"
-              @click="active = tab"
-            >
-              <AppIcon :name="tab.icon" :size="18" />{{ t(tab.label) }}
-            </button>
-          </div>
-          <div role="tabpanel" class="panel">
-            <KeepAlive>
-              <component :is="active.component" />
-            </KeepAlive>
-          </div>
-        </section>
-      </div>
 
-      <LogPanel class="logs" />
+        <AppCard class="workspace">
+          <template #header>
+            <nav class="tabs" role="tablist">
+              <button
+                v-for="tab in tabs"
+                :key="tab.id"
+                role="tab"
+                class="tab"
+                :aria-selected="active.id === tab.id"
+                @click="active = tab"
+              >
+                <AppIcon :name="tab.icon" :size="18" />{{ t(tab.label) }}
+              </button>
+            </nav>
+          </template>
+          <KeepAlive>
+            <component :is="active.component" />
+          </KeepAlive>
+        </AppCard>
+
+        <LogPanel />
+      </div>
     </main>
 
-    <footer class="hint footer">
-      {{ t("footer.license") }} {{ t("footer.warning") }}
-    </footer>
-
-    <ConfirmDialog />
-    <ReconnectDialog />
+    <footer class="hint footer">{{ t("footer.license") }} {{ t("footer.warning") }}</footer>
   </div>
+
+  <ConfirmDialog />
+  <ReconnectDialog />
 </template>
 
 <style scoped>
-.app {
+.page {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-  max-width: 1240px;
+  gap: var(--space-4);
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 20px 24px;
+  padding: var(--space-4);
 }
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-  grid-template-areas:
-    "device main"
-    "logs logs";
+  grid-template-columns: var(--sidebar) minmax(0, 1fr);
   align-items: start;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
-.layout > :first-child {
-  grid-area: device;
+.sidebar {
+  position: sticky;
+  top: calc(64px + var(--space-4));
 }
 
-.main {
-  grid-area: main;
-  gap: 16px;
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
 }
 
-.logs {
-  grid-area: logs;
-}
-
-@media (max-width: 820px) {
-  .app {
-    padding: 0 12px 24px;
+@media (max-width: 860px) {
+  .page {
+    padding: var(--space-3);
   }
 
   .layout {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "device"
-      "main"
-      "logs";
+    gap: var(--space-3);
+  }
+
+  .content {
+    gap: var(--space-3);
+  }
+
+  .sidebar {
+    position: static;
   }
 }
 
-.workspace {
-  padding: 8px 20px 20px;
+/* The tab strip replaces the card title, so it spans the header edge to edge. */
+.workspace :deep(.app-card-head) {
+  padding: 0 var(--space-2);
 }
 
 .tabs {
   display: flex;
-  gap: 4px;
-  margin: 0 -8px 16px;
+  align-self: stretch;
+  gap: var(--space-1);
   overflow-x: auto;
   scrollbar-width: none;
-  border-bottom: 1px solid var(--outline-variant);
 }
 
 .tab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 12px 16px;
+  gap: var(--space-2);
+  margin-bottom: -1px;
+  padding: 0 var(--space-3);
   border: 0;
   border-bottom: 3px solid transparent;
   background: transparent;
@@ -163,6 +166,7 @@ watch(active, (tab) => history.replaceState(null, "", `#${tab.id}`));
 }
 
 .footer {
+  padding-bottom: var(--space-2);
   text-align: center;
 }
 </style>

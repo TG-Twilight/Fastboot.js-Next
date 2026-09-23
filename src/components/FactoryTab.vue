@@ -11,37 +11,35 @@ const reboot = ref(true);
 </script>
 
 <template>
-  <div class="stack">
-    <p class="hint">{{ t("factory.description") }}</p>
-    <FilePicker v-model="file" accept=".zip" />
+  <p class="hint">{{ t("factory.description") }}</p>
+  <FilePicker v-model="file" accept=".zip" />
 
-    <label class="check">
-      <input v-model="wipe" type="checkbox" />
-      <span>
-        {{ t("factory.wipe") }}
-        <span class="hint block">{{ t("factory.wipeHint") }}</span>
-      </span>
-    </label>
-    <label class="check">
-      <input v-model="reboot" type="checkbox" />
-      <span>{{ t("factory.reboot") }}</span>
-    </label>
+  <label class="check">
+    <input v-model="wipe" type="checkbox" />
+    <span>
+      {{ t("factory.wipe") }}
+      <span class="hint block">{{ t("factory.wipeHint") }}</span>
+    </span>
+  </label>
+  <label class="check">
+    <input v-model="reboot" type="checkbox" />
+    <span>{{ t("factory.reboot") }}</span>
+  </label>
 
-    <div class="banner">
-      <AppIcon name="warning" />
-      <span>{{ t("factory.notice") }}</span>
-    </div>
+  <div class="banner">
+    <AppIcon name="warning" />
+    <span>{{ t("factory.notice") }}</span>
+  </div>
 
-    <div class="row">
-      <button
-        class="btn"
-        :class="{ danger: wipe }"
-        :disabled="!isConnected || isBusy || !file"
-        @click="file && flashFactory(file, { wipe, reboot })"
-      >
-        <AppIcon name="archive" />{{ t("factory.start") }}
-      </button>
-    </div>
+  <div class="row">
+    <button
+      class="btn"
+      :class="{ danger: wipe }"
+      :disabled="!isConnected || isBusy || !file"
+      @click="file && flashFactory(file, { wipe, reboot })"
+    >
+      <AppIcon name="archive" />{{ t("factory.start") }}
+    </button>
   </div>
 </template>
 

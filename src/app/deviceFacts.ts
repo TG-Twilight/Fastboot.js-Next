@@ -113,3 +113,10 @@ export function notices(p: DeviceProfile): Notice[] {
   if (p.mode === "fastbootd") list.push({ tone: "info", text: t("notice.fastbootd") });
   return list;
 }
+
+/** Plain-text version of the facts, for pasting into a forum post or chat. */
+export function factsToText(groups: FactGroup[]): string {
+  return groups
+    .map((group) => [`[${t(group.title)}]`, ...group.facts.map((fact) => `${t(fact.label)}: ${fact.value}`)].join("\n"))
+    .join("\n\n");
+}
