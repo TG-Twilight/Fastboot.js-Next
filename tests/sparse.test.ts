@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ChunkType, FastbootDevice, SPARSE_MAGIC, imageSize, parseSparseHeader, splitImage } from "../src/fastboot";
-import { FakeDevice } from "./fakeDevice";
+import { FakeDevice, sameBytes } from "./fakeDevice";
 
 const BLOCK = 4096;
 
@@ -86,7 +86,7 @@ describe("splitImage", () => {
       expect(part.size).toBeLessThanOrEqual(max);
       applySparse(result, await bytes(part));
     }
-    expect(result.subarray(0, raw.byteLength)).toEqual(raw);
+    expect(sameBytes(result.subarray(0, raw.byteLength), raw)).toBe(true);
     expect(result.subarray(raw.byteLength).every((b) => b === 0)).toBe(true);
   });
 
@@ -117,7 +117,7 @@ describe("splitImage", () => {
       expect(part.size).toBeLessThanOrEqual(max);
       applySparse(result, await bytes(part));
     }
-    expect(result).toEqual(expected);
+    expect(sameBytes(result, expected)).toBe(true);
   });
 
   it("flashes every split payload to the same partition", async () => {
@@ -133,6 +133,6 @@ describe("splitImage", () => {
       expect(partition).toBe("system_a");
       applySparse(result, data);
     }
-    expect(result).toEqual(raw);
+    expect(sameBytes(result, raw)).toBe(true);
   });
 });

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import type { Transport } from "../src/fastboot/transport";
 
 /** A scripted fastboot device that speaks the protocol over an in-memory transport. */
@@ -69,4 +70,9 @@ export class FakeDevice implements Transport {
   private reply(text: string) {
     this.pending.push(new TextEncoder().encode(text));
   }
+}
+
+/** Byte comparison; toEqual walks typed arrays element by element and is far too slow for images. */
+export function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
+  return Buffer.from(a.buffer, a.byteOffset, a.byteLength).equals(Buffer.from(b.buffer, b.byteOffset, b.byteLength));
 }

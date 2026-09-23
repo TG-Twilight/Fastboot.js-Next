@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FastbootCommandError, FastbootDevice, parseVariableLine } from "../src/fastboot";
-import { FakeDevice } from "./fakeDevice";
+import { FakeDevice, sameBytes } from "./fakeDevice";
 
 function setup() {
   const fake = new FakeDevice();
@@ -65,7 +65,7 @@ describe("FastbootDevice", () => {
     await device.flash("boot_a", new Blob([image]), { onProgress: (p) => progress.push(p) });
     expect(fake.flashed).toHaveLength(1);
     expect(fake.flashed[0].partition).toBe("boot_a");
-    expect(fake.flashed[0].data).toEqual(image);
+    expect(sameBytes(fake.flashed[0].data, image)).toBe(true);
     expect(progress.at(-1)).toBe(1);
   });
 
