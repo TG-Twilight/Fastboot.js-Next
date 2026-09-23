@@ -1,0 +1,32 @@
+{
+  "name": "fastboot-js-next",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Flash Android devices from the browser over WebUSB.",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TG-Twilight/Fastboot.js-Next.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@zip.js/zip.js": "^2.17.0",
+    "vue": "^3.5.43"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/w3c-web-usb": "^1.0.14",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1",
+    "vue-tsc": "^3.3.11"
+  }
+}
