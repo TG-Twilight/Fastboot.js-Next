@@ -16,7 +16,7 @@ export default {
   "device.state.reconnecting": "Waiting for the device…",
   "device.connect": "Connect",
   "device.disconnect": "Disconnect",
-  "device.hint": "Boot the device into bootloader (fastboot) mode, plug it in over USB, then click Connect.",
+  "device.hint": "Boot the device into bootloader (fastboot) mode, e.g. with \"adb reboot bootloader\", plug it in over USB, then click Connect.",
   "device.product": "Product",
   "device.serial": "Serial",
   "device.mode": "Mode",
@@ -119,6 +119,7 @@ export default {
   "log.empty": "Nothing logged yet.",
 
   "errors.cancelled": "Cancelled",
+  "errors.adbMode": "The device is running Android (ADB mode), not fastboot. Run \"adb reboot bootloader\" or power it off and hold Volume Down + Power, then connect again.",
   "errors.disconnected": "The device was disconnected",
   "errors.openHint": "Make sure no other program (adb, fastboot, Android Studio) is using the device. On Windows it needs the WinUSB driver (Google USB Driver); on Linux add a udev rule for it.",
   "errors.requirement": "This image is not meant for this device: it requires {variable} = {expected}, the device reports {actual}.",

@@ -22,6 +22,13 @@ export class FastbootProtocolError extends FastbootError {}
 /** A USB level failure: opening, claiming or transferring. */
 export class FastbootUsbError extends FastbootError {}
 
+/** The selected device is running Android (ADB) instead of fastboot. */
+export class FastbootAdbModeError extends FastbootUsbError {
+  constructor() {
+    super("The device is booted into Android (ADB mode), not fastboot. Reboot it into the bootloader first.");
+  }
+}
+
 /** The image is malformed or cannot be flashed as requested. */
 export class FastbootImageError extends FastbootError {}
 

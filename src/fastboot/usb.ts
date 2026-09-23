@@ -1,12 +1,18 @@
 import { FastbootDevice } from "./device";
-import { FASTBOOT_USB_FILTER, WebUsbTransport, isFastbootDevice } from "./transport";
+import { FastbootAdbModeError } from "./errors";
+import { ADB_USB_FILTER, FASTBOOT_USB_FILTER, WebUsbTransport, isAdbDevice, isFastbootDevice } from "./transport";
 
-/** Shows the browser's device picker, limited to fastboot interfaces. Needs a user gesture. */
+/**
+ * Shows the browser's device picker. Needs a user gesture. ADB devices are listed too, so that
+ * a phone still booted into Android shows up and can be told to reboot instead of silently
+ * missing from the list.
+ */
 export function requestUsbDevice(): Promise<USBDevice> {
-  return navigator.usb.requestDevice({ filters: [FASTBOOT_USB_FILTER] });
+  return navigator.usb.requestDevice({ filters: [FASTBOOT_USB_FILTER, ADB_USB_FILTER] });
 }
 
 export async function openFastboot(usb: USBDevice): Promise<FastbootDevice> {
+  if (!isFastbootDevice(usb) && isAdbDevice(usb)) throw new FastbootAdbModeError();
   return new FastbootDevice(await WebUsbTransport.open(usb));
 }
 

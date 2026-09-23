@@ -15,6 +15,30 @@ export const FASTBOOT_USB_FILTER: USBDeviceFilter = {
   protocolCode: 0x03
 };
 
+/** ADB uses the same class and subclass; a device matching it is booted into Android, not fastboot. */
+export const ADB_USB_FILTER: USBDeviceFilter = {
+  classCode: 0xff,
+  subclassCode: 0x42,
+  protocolCode: 0x01
+};
+
+function hasInterface(device: USBDevice, filter: USBDeviceFilter): boolean {
+  return device.configurations.some((configuration) =>
+    configuration.interfaces.some((iface) =>
+      iface.alternates.some(
+        (alternate) =>
+          alternate.interfaceClass === filter.classCode &&
+          alternate.interfaceSubclass === filter.subclassCode &&
+          alternate.interfaceProtocol === filter.protocolCode
+      )
+    )
+  );
+}
+
+export function isAdbDevice(device: USBDevice): boolean {
+  return hasInterface(device, ADB_USB_FILTER);
+}
+
 interface FastbootInterface {
   configuration: USBConfiguration;
   iface: USBInterface;

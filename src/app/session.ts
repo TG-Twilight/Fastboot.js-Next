@@ -1,6 +1,6 @@
 import { computed, reactive } from "vue";
 import type { FastbootDevice, RebootTarget, Slot, SlotSelector } from "@/fastboot/device";
-import { FactoryRequirementError, FastbootAbortError, FastbootUsbError } from "@/fastboot/errors";
+import { FactoryRequirementError, FastbootAbortError, FastbootAdbModeError, FastbootUsbError } from "@/fastboot/errors";
 import type { FactoryStep } from "@/fastboot/factory";
 import { isWebUsbSupported } from "@/fastboot/transport";
 import { openFastboot, requestUsbDevice, waitForUsbDevice } from "@/fastboot/usb";
@@ -93,6 +93,8 @@ function isUserCancel(error: unknown): boolean {
 function reportError(error: unknown): void {
   if (isUserCancel(error) || error instanceof FastbootAbortError) {
     log("warn", t("errors.cancelled"));
+  } else if (error instanceof FastbootAdbModeError) {
+    log("error", t("errors.adbMode"));
   } else if (error instanceof FactoryRequirementError) {
     log("error", t("errors.requirement", {
       variable: error.variable,
@@ -141,7 +143,7 @@ async function attach(selected: USBDevice): Promise<void> {
       device = await openFastboot(selected);
       break;
     } catch (error) {
-      if (attempt >= 4) throw error;
+      if (attempt >= 4 || error instanceof FastbootAdbModeError) throw error;
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }

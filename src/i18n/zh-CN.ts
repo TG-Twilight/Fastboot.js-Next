@@ -18,7 +18,7 @@ export default {
   "device.state.reconnecting": "等待设备重新连接…",
   "device.connect": "连接",
   "device.disconnect": "断开",
-  "device.hint": "将设备重启到 bootloader（fastboot）模式并用 USB 连接电脑，然后点击“连接”。",
+  "device.hint": "将设备重启到 bootloader（fastboot）模式（例如执行“adb reboot bootloader”）并用 USB 连接电脑，然后点击“连接”。",
   "device.product": "产品",
   "device.serial": "序列号",
   "device.mode": "模式",
@@ -121,6 +121,7 @@ export default {
   "log.empty": "暂无日志。",
 
   "errors.cancelled": "已取消",
+  "errors.adbMode": "设备当前运行在 Android 系统中（ADB 模式），而不是 fastboot 模式。请执行“adb reboot bootloader”，或关机后按住音量下键 + 电源键进入 fastboot，然后重新连接。",
   "errors.disconnected": "设备已断开连接",
   "errors.openHint": "请确认没有其他程序（adb、fastboot、Android Studio）占用设备。Windows 需要安装 WinUSB 驱动（Google USB Driver）；Linux 需要为设备添加 udev 规则。",
   "errors.requirement": "此镜像不适用于该设备：要求 {variable} = {expected}，设备实际为 {actual}。",
